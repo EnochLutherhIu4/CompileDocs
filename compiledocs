@@ -63,6 +63,8 @@ $project = "Docs";
 $smarty = new Smarty();
 $smarty->compile_check = true;
 $smarty->debugging = true;
+$smarty->left_delimiter = "##";
+$smarty->right_delimiter = "##";
 $smarty->assign('project', $project);
 
 $args = getopt("fgdshl:o:i:m:t:p:", array("force","github","deploy","silence", "help", "location:","output:", "index:", "message:", "template:", "project:"));

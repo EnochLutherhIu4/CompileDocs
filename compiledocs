@@ -4,7 +4,7 @@
  * compiledocs
  *
  * Create HTML pages from Markdown text documents and then commit them to your git repo
- * under the gh-pages branch ready for GitHub!
+ * under the gh-pages branch ready for GitHub! Page theme with Smarty
  *
  *  Usage:
  *  ./compiledocs
@@ -219,11 +219,11 @@ try
         $smarty->assign('generated', strftime("%x")." at ".strftime("%X"));
         $smarty->assign('prev', $prevPage);
         $smarty->assign('next', $nextPage);
+        $smarty->assign('content', $page['html']);
 
-        $header = $smarty->fetch('header.tpl');
-        $footer = $smarty->fetch('footer.tpl');
+        $pageHTML = $smarty->fetch('page.tpl');
 
-        if (file_put_contents("$output/$outputFileName", $header.$page['html'].$footer) === false)
+        if (file_put_contents("$output/$outputFileName", $pageHTML) === false)
             throw new Exception("HTML for file '$pageName' could not be written out to '$output/$outputFileName'.");
 
         if ($github) // stage file

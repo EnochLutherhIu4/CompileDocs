@@ -23,6 +23,7 @@
  *  -m, --message  <msg>   : Optional message for git commit.
  *  -d, --deploy           : Deploy, push the 'gh-pages' remote branch.
  *  -t, --template <name>  : Use Smarty template 'name'
+ *  -p, --project <name>   : Optional project name
  *  -s, --silence          : Silence output
  *  -h, --help             : This help
  *
@@ -56,16 +57,23 @@ $github = false;
 $message = false;
 $deploy = false;
 $silence = false;
-$smarty = false;
+$template = false;
+$project = "Docs";
 
 // ******
 // if smarty is installed
 if (file_exists('lib/smarty/Smarty.class.php'))
 {
     require 'lib/smarty/Smarty.class.php';
+    $smarty = new Smarty();
+    $smarty->compile_check = true;
+    $smarty->debugging = true;
+    $smarty->assign('project', $project);
 }
+else
+    $smarty = false;
 
-$args = getopt("fgdshl:o:i:m:t:", array("force","github","deploy","silence", "help", "location:","output:", "index:", "message:", "template:"));
+$args = getopt("fgdshl:o:i:m:t:p:", array("force","github","deploy","silence", "help", "location:","output:", "index:", "message:", "template:", "project:"));
 
 foreach($args as $argname => $argval)
 {
@@ -89,6 +97,7 @@ Options:
  -m, --message  <msg>   : Optional message for git commit.
  -d, --deploy           : Deploy, push the 'gh-pages' remote branch.
  -t, --template <name>  : Use Smarty template 'name'
+ -p, --project <name>   : Optional project name
  -s, --silence          : Silence output (default off)
  -h, --help             : This help
 
@@ -131,9 +140,18 @@ Options:
     {
         $silence = true;
     }
+    else if ($argname === 'p' || $argname === 'project')
+    {
+        $project = $argval;
+        $smarty->assign('project', $project);
+    }
     else if ($argname === 't' || $argname === 'template')
     {
-        $smarty = $argval;
+        $template = $argval;
+        $smarty->template_dir = "templates/$template/templates";
+        $smarty->compile_dir = "templates/$template/templates_c";
+        $smarty->cache_dir = "templates/$template/cache";
+        $smarty->config_dir = "templates/$template/configs";
     }
 }
 
@@ -212,7 +230,10 @@ try
                 "    <meta charset=\"utf-8\" />".
                 "    <title>$pageName</title>".
                 "</head>".
-                "<body id=\"index\" class=\"home\">";
+                "<body id=\"index\" class=\"home\">".
+                "<nav id=\"main\">".
+                "<a href=\"index.html\">Home</a> - <a href=\"$prevPage\">Prev</a> - <a href=\"$nextPage\">Next</a> - <a href=\"_docs_index.html\">Index</a>".
+                "<hr></nav>";
 
             $footer = "<footer>".
                 "    <hr>".
@@ -220,16 +241,19 @@ try
                 "</footer>".
                 "</body>".
                 "</html>";
-
-            $nav = "<nav id=\"main\">".
-                "<a href=\"index.html\">Home</a> - <a href=\"$prevPage\">Prev</a> - <a href=\"$nextPage\">Next</a> - <a href=\"_docs_index.html\">Index</a>".
-                "<hr></nav>";
         }
         else
         {
+            $smarty->assign('name', $pageName);
+            $smarty->assign('generated', strftime("%x")." at ".strftime("%X"));
+            $smarty->assign('prev', $prevPage);
+            $smarty->assign('next', $nextPage);
+
+            $header = $smarty->fetch('header.tpl');
+            $footer = $smarty->fetch('footer.tpl');
         }
 
-        if (file_put_contents("$output/$outputFileName", $header.$nav.$page['html'].$footer) === false)
+        if (file_put_contents("$output/$outputFileName", $header.$page['html'].$footer) === false)
             throw new Exception("HTML for file '$pageName' could not be written out to '$output/$outputFileName'.");
 
         if ($github) // stage file
@@ -241,6 +265,21 @@ try
     }
 
     // build index
+    asort($pages);
+    $firstletter = false;
+    $indexHTML = "<ul>";
+    foreach ($pages as $page)
+    {
+        if ($firstletter !== strtolower($page['name'][0]))
+        {
+            $firstletter = strtolower($page['name'][0]);
+            $indexHTML .= "</ul><h3 class=\"indexsection\">$firstletter</h3><ul>";
+        }
+
+        $indexHTML .= "<li class=\"indexlink\"><a href=\"".$page['name'].".html\">".$page['name']."</a></li>";
+    }
+    $indexHTML .= "</ul>";
+
     if (!$smarty)
     {
         $indexheader = "<!DOCTYPE html>".
@@ -261,22 +300,11 @@ try
     }
     else
     {
+        $smarty->assign('content', $indexHTML);
+        $indexHTML = $smarty->fetch('index.tpl');
     }
 
-    asort($pages);
-    $firstletter = false;
-    $indexHTML = "<ul>";
-    foreach ($pages as $page)
-    {
-        if ($firstletter !== strtolower($page['name'][0]))
-        {
-            $firstletter = strtolower($page['name'][0]);
-            $indexHTML .= "</ul><h3 class=\"indexsection\">$firstletter</h3><ul>";
-        }
-
-        $indexHTML .= "<li class=\"indexlink\"><a href=\"".$page['name'].".html\">".$page['name']."</a></li>";
-    }
-    $indexHTML = $indexheader.$indexHTML."</ul>".$indexfooter;
+    $indexHTML = $indexheader.$indexHTML.$indexfooter;
 
     if ($index && !$pageFound)
     {

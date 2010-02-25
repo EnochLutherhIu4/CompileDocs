@@ -1,0 +1,264 @@
+#!/usr/bin/php
+<?php
+/*
+ * compiledocs
+ *
+ * Create HTML pages from Markdown text documents and then commit them to your git repo
+ * under the gh-pages branch ready for GitHub!
+ *
+ *  Usage:
+ *  ./compiledocs
+ *
+ * Options:
+ *  -f, --force            : Force overwrite if output to folder (default no)
+ *  -l, --location <path>  : Location of source folder (default .)
+ *  -o, --output   <path>  : This will set the location for the generated files.
+ *  -i, --index <doc name> : Doc to set as index.html. (default as automatically generated docs index)
+ *  -g, --github           : If set before generating the docs the 'gh-pages' branch will attempt
+ *                           to be checked out (it must exist already, created as specified at GitHub)
+ *                           and the generated files place in the root). The result will then be
+ *                           commited with either a default message including the generating time or
+ *                           using the message specified by -m,--message. Use -d to also push.
+ *                           (default off)
+ *  -m, --message  <msg>   : Optional message for git commit.
+ *  -d, --deploy           : Deploy, push the 'gh-pages' remote branch.
+ *  -s, --silence          : Silence output
+ *  -h, --help             : This help
+ *
+ * Copyright 2009, 2010 Stephen Paul Ierodiaconou
+ *
+ * This file is part of compiledocs <http://github.com/stevegeek/CompileDocs>.
+ *
+ * compiledocs is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * compiledocs is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with compiledocs.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+include_once "markdown.php";
+
+include_once "smartypants.php";
+
+$force = false;
+$location = ".";
+$output = false;
+$index = false;
+$github = false;
+$message = false;
+$deploy = false;
+$silence = false;
+
+$args = getopt("fgdshl:o:i:m:", array("force","github","deploy","silence", "help", "location:","output:", "index:", "message:"));
+
+foreach($args as $argname => $argval)
+{
+    if ($argname === 'h' || $argname === 'help')
+    {
+?>
+Usage:
+ ./compiledocs
+
+Options:
+ -f, --force            : Force overwrite if output to folder (default no)
+ -l, --location <path>  : Location of source folder (default .)
+ -o, --output   <path>  : This will set the location for the generated files.
+ -i, --index <doc name> : Doc to set as index.html. (default as automatically generated docs index)
+ -g, --github           : If set before generating the docs the 'gh-pages' branch will attempt
+                          to be checked out (it must exist already, created as specified at GitHub)
+                          and the generated files place in the root). The result will then be
+                          commited with either a default message including the generating time or
+                          using the message specified by -m,--message. Use -d to also push.
+                          (default off)
+ -m, --message  <msg>   : Optional message for git commit.
+ -d, --deploy           : Deploy, push the 'gh-pages' remote branch.
+ -s, --silence          : Silence output (default off)
+ -h, --help             : This help
+
+ EG.
+ ./compiledocs -l ../Docs -i About -g -m "Docs being updated" -d
+
+<?php
+        return;
+    }
+    else if ($argname === 'f' || $argname === 'force')
+    {
+        $force = true;
+        echo " - Force write on\n";
+    }
+    else if ($argname === 'o' || $argname === 'output')
+    {
+        $output = $argval;
+    }
+    else if ($argname === 'l' || $argname === 'location')
+    {
+        $location = $argval;
+    }
+    else if ($argname === 'i' || $argname === 'index')
+    {
+        $index = $argval;
+    }
+    else if ($argname === 'g' || $argname === 'github')
+    {
+        $github = true;
+    }
+    else if ($argname === 'm' || $argname === 'message')
+    {
+        $location = $argval;
+    }
+    else if ($argname === 'd' || $argname === 'deploy')
+    {
+        $deploy = true;
+    }
+    else if ($argname === 's' || $argname === 'silence')
+    {
+        $silence = true;
+    }
+}
+
+try
+{
+    if (!$output)
+        throw new Exception("You must set an output location with -o,--output.");
+
+    $pages = array();
+    $dirit = new DirectoryIterator($location);
+    if (!$dirit->isReadable())
+        throw new Exception("Check the location '$location' is readable.");
+
+    foreach ($dirit as $fileInfo) // replace with Recursive
+    {
+        if (!$fileInfo->isFile() || strpos($fileInfo->getFilename(), ".") === 0)
+            continue;
+        $pname = $fileInfo->getPathname();
+        $fname = $fileInfo->getFilename();
+
+        if (!$silence) echo "Reading input file: $pname\n";
+        $text = file_get_contents($pname);
+        if ($text === false)
+            throw new Exception("The file '$pname' is not readable.");
+
+        $html = SmartyPants(Markdown($text));
+
+        $pages[] = array('name' => $fname, 'html' => $html);
+    }
+
+    // prepare destination
+    if ($github)
+    {
+        exec("git --git-dir=$output/.git --work-tree=$output checkout gh-pages 2>&1", $gitoutput, $gitresult);
+        if ($gitresult != 0)
+            throw new Exception("git error: could not checkout gh-pages branch, make sure you have correctly set it up according to the GitHub guide.");
+    }
+    else
+    {
+        if ((file_exists($output) && $force) || !file_exists($output))
+        {
+            if (!$silence) echo "Create directory '$output'\n";
+            @mkdir($output);
+        }
+        else
+            throw new Exception("The output directory already exists. Enable -f,--force to overwrite.");
+    }
+
+    // write pages
+    foreach ($pages as $page)
+    {
+        $pageName = $page['name'];
+
+        if ($index && ($index == $pageName))
+        {
+            $outputFileName = "index.html";
+            $pageFound = true;
+        }
+        else
+        {
+            $outputFileName = "$pageName.html";
+        }
+
+        $header = "
+<!DOCTYPE html>
+<html lang=\"en\">
+<head>
+<meta charset=\"utf-8\" />
+<title>$pageName</title>
+</head>
+<body id=\"index\" class=\"home\">";
+        $footer = "</body>
+</html>";
+
+        if (file_put_contents("$output/$outputFileName", $header.$page['html'].$footer) === false)
+            throw new Exception("HTML for file '$pageName' could not be written out to '$output/$outputFileName'.");
+
+        if ($github) // stage file
+        {
+            exec("git --git-dir=$output/.git --work-tree=$output add \"$outputFileName\" 2>&1", $gitoutput, $gitresult);
+            if ($gitresult != 0)
+                throw new Exception("git error: could not git-add page $outputFileName, make sure you have correctly set it up according to the GitHub guide.");
+        }
+    }
+
+    // build index
+    $indexHTML = "
+<!DOCTYPE html>
+<html lang=\"en\">
+<head>
+<meta charset=\"utf-8\" />
+<title>Documentation Index</title>
+</head>
+<body id=\"index\" class=\"home\">
+</body>
+</html>";
+
+    if ($index && !$pageFound)
+    {
+        echo "WARNING: The specified index page '$index' was not found. The index page is replaced with the automatically generated page index.\n";
+        $index = false;
+    }
+
+    if (!$index)
+        $outputFileName = "index.html";
+    else
+        $outputFileName = "_docs_index.html";
+
+    if (file_put_contents("$output/$outputFileName", $indexHTML) === false)
+        throw new Exception("HTML for generate page index file could not be written out to '$output/$outputFileName'.");
+
+    if ($github)
+    {
+        // stage index file
+        exec("git --git-dir=$output/.git --work-tree=$output add \"$outputFileName\" 2>&1", $gitoutput, $gitresult);
+        if ($gitresult != 0)
+            throw new Exception("git error: could not git-add page $outputFileName, make sure you have correctly set it up according to the GitHub guide.");
+
+        // commit
+        if (!$message)
+            $message = "Docs generated at ".strftime("%x %X");
+        exec("git --git-dir=$output/.git --work-tree=$output commit -m \"$message\" 2>&1", $gitoutput, $gitresult);
+        if ($gitresult != 0)
+            throw new Exception("git error: could not git-commit pages, make sure you have correctly set gh-pages up according to the GitHub guide.");
+
+        // switch back to prev branch
+        exec("git --git-dir=$output/.git --work-tree=$output checkout master 2>&1", $gitoutput, $gitresult);
+        if ($gitresult != 0)
+            throw new Exception("git error: could not checkout master branch. You will still be on the gh-pages branch.");
+
+        // push to github
+        if ($deploy)
+        {
+            exec("git --git-dir=$output/.git --work-tree=$output push origin gh-pages 2>&1", $gitoutput, $gitresult);
+            if ($gitresult != 0)
+                throw new Exception("git error: could not push gh-pages to GitHub, make sure you have correctly set gh-pages up according to the GitHub guide.");
+        }
+    }
+}
+catch( Exception $e ) {
+    echo "compiledocs : Exception thrown : ".$e->getMessage()."\n";
+}

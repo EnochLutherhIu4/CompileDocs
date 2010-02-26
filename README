@@ -1,8 +1,8 @@
 CompileDocs
 -----------
 
-Create HTML pages from Markdown text documents and then commit them to 
-your git repo under the gh-pages branch ready for GitHub! 
+Create HTML pages from Markdown text documents and then commit them to
+your git repo under the gh-pages branch ready for GitHub!
 Page theme with Smarty.
 
 
@@ -15,28 +15,31 @@ PHP Smarty     	<http://www.smarty.net/>
 
 Usage:
 -----
- ./compiledocs <options>
 
-Options:
-     -f, --force            : Force overwrite if output to folder (default no)
-     -l, --location <path>  : Location of source folder (default .)
-     -o, --output   <path>  : This will set the location for the generated files.
-     -i, --index <doc name> : Doc to set as index.html. (default as automatically generated docs index)
-     -g, --github           : If set before generating the docs the 'gh-pages' branch will attempt
-                          to be checked out (it must exist already, created as specified at GitHub)
-                          and the generated files place in the root). The result will then be
-                          commited with either a default message including the generating time or
-                          using the message specified by -m,--message. Use -d to also push.
-                          (default off)
-     -m, --message  <msg>   : Optional message for git commit.
-     -d, --deploy           : Deploy, push the 'gh-pages' remote branch.
-     -t, --template <name>  : Use Smarty template 'name'
-     -p, --project <name>   : Optional project name
-     -s, --silence          : Silence output (default off)
-     -h, --help             : This help
+    ./compiledocs <options>
+
+    Options:
+    -f, --force            : Force overwrite if output to folder (default no)
+    -l, --location <path>  : Location of source folder (default .)
+    -o, --output   <path>  : This will set the location for the generated files.
+    -i, --index <doc name> : Doc to set as index.html. (default as automatically generated docs index)
+    -g, --github           : If set before generating the docs the 'gh-pages' branch will attempt
+                      to be checked out (it must exist already, created as specified at GitHub)
+                      and the generated files place in the root). The result will then be
+                      commited with either a default message including the generating time or
+                      using the message specified by -m,--message. Use -d to also push.
+                      (default off)
+    -m, --message  <msg>   : Optional message for git commit.
+    -d, --deploy           : Deploy, push the 'gh-pages' remote branch.
+    -t, --template <name>  : Use Smarty template 'name'
+    -p, --project <name>   : Optional project name
+    -s, --silence          : Silence output (default off)
+    -h, --help             : This help
 
  EG.
- ./compiledocs -l ../Docs -i About -g -m "Docs being updated" -d
+
+    ./compiledocs -l ../Docs -i About -g -m "Docs being updated" -d
+
 
 License
 ------

